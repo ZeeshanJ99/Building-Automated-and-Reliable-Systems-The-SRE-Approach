@@ -15,3 +15,11 @@ edit this to fit what we will do
 ![image](https://user-images.githubusercontent.com/88186084/136239065-448783f5-304d-45ba-b61f-bc53178e4a5d.png)
 
 
+## Monitoring Team Section
+
+
+## Testing Team Section
+
+
+## Automation Team Section
+
