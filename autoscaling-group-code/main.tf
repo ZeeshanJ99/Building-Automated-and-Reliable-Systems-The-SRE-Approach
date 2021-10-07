@@ -49,14 +49,80 @@ resource "aws_subnet" "sre_amy_terraform_private_subnet" {
     }
 }
 
+# Making new security group for k8s
+resource "aws_security_group" "sre_k8s_app_sg"  {
+    name = "sre_k8s_app_sg"
+    description = "sre_k8s_app_sg"
+    vpc_id = aws_vpc.sre_amy_terraform_vpc.id
+    ingress {
+        from_port = "80"
+        to_port = "80"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"] 
+    }
+    ingress {
+        from_port = "22"
+        to_port = "22"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        from_port = "3000"
+        to_port = "3000"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  
+    }
+    ingress {
+        from_port = "5000"
+        to_port = "5000"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  
+    }
+    ingress {
+        from_port = "30000"
+        to_port = "32757"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  
+    }
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1" # allow all
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  tags = {
+    Name = "sre_k8s_app_sg"
+  }
+}
+
+# Let's launch an EC2 instance
+resource "aws_instance" "sre_k8s_app" {
+    ami = var.k8_ami_id
+    subnet_id = aws_subnet.sre_amy_terraform_public_subnet.id
+    instance_type = var.instance_type
+    associate_public_ip_address = true
+    tags = {
+       Name = "sre_k8s_app"
+    }
+    vpc_security_group_ids = [aws_security_group.sre_k8s_app_sg.id]
+    key_name = var.aws_key_name
+    connection {
+		type = "ssh"
+		user = "ubuntu"
+		private_key = var.aws_key_path
+		host = aws_instance.sre_k8s_app.id
+	} 
+}
+
 # CloudWatch Code Section
 # Launch configuration
 resource "aws_launch_configuration" "sre_amy_app_terraform_launch_config" {
   name = "sre_amy_app_terraform_launch_config"
   image_id = var.k8_ami_id
-  instance_type = "t2.micro"
+  instance_type = var.instance_type
   key_name = var.aws_key_name
-  security_groups = [var.k8_sg]
+  security_groups = [aws_security_group.sre_k8s_app_sg.id]
   associate_public_ip_address = true
 }
 
@@ -65,7 +131,7 @@ resource "aws_lb" "sre_amy_terraform_alb" {
   name = "sre-amy-terraform-alb"
   internal = false
   load_balancer_type = "application"
-  security_groups = [var.k8_sg]
+  security_groups = [aws_security_group.sre_k8s_app_sg.id]
   subnets = [aws_subnet.sre_amy_terraform_public_subnet.id, aws_subnet.sre_amy_terraform_private_subnet.id]
   tags = {
     Name = "sre-amy-terraform-alb"
@@ -98,7 +164,7 @@ resource "aws_lb_listener" "sre_amy_terraform_listener" {
 # target group attachment
 resource "aws_lb_target_group_attachment" "sre_amy_terraform_tg_attachment" {
   target_group_arn = aws_lb_target_group.sre_amy_terraform_target_group.arn
-  target_id = var.k8_instance_id
+  target_id = aws_instance.sre_k8s_app.id
   port = 80
 }
 # auto scaling group from launch config
@@ -130,7 +196,7 @@ resource "aws_autoscaling_policy" "sre_amy_terraform_as_policy" {
         predefined_metric_specification {
             predefined_metric_type = "ASGAverageCPUUtilization"
         }
-        target_value = 2.0
+        target_value = 20
     }
 }
 

@@ -1,2 +1,4 @@
-autoscaling-group-code\.terraform\.
+autoscaling-group-code\.terraform\providers\registry.terraform.io\hashicorp\aws\3.61.0\windows_amd64\terraform-provider-aws_v3.61.0_x5.exe
 autoscaling-group-code\.terraform.lock.hcl
+autoscaling-group-code\terraform.tfstate
+autoscaling-group-code\terraform.tfstate.backup
