@@ -38,81 +38,6 @@ resource "aws_subnet" "sre_amy_terraform_public_subnet" {
     }
 }
 
-# Adding an app security group
-resource "aws_security_group" "sre_amy_terraform_app_sg_2"  {
-    name = "sre_amy_terraform_app_sg_2"
-    description = "sre_amy_terraform_app_sg_2"
-    vpc_id = aws_vpc.sre_amy_terraform_vpc.id
-    ingress {
-        from_port = "80"
-        to_port = "80"
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"] 
-    }
-    ingress {
-        from_port = "22"
-        to_port = "22"
-        protocol = "tcp"
-        cidr_blocks = ["${var.my_ip}/32"]
-    }
-    ingress {
-        from_port = "3000"
-        to_port = "3000"
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]  
-    }
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1" # allow all
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-  tags = {
-    Name = "sre_amy_terraform_app_sg_2"
-  }
-}
-
-# Let's launch an EC2 instance using the app AMI
-resource "aws_instance" "app_instance" {
-    ami = var.webapp_ami_id
-    subnet_id = aws_subnet.sre_amy_terraform_public_subnet.id
-    instance_type = var.instance_type
-    associate_public_ip_address = true
-    tags = {
-       Name = "sre_amy_terraform_app"
-    }
-    vpc_security_group_ids = [aws_security_group.sre_amy_terraform_app_sg_2.id]
-    key_name = var.aws_key_name
-    connection {
-		type = "ssh"
-		user = "ubuntu"
-		private_key = var.aws_key_path
-		host = db_instance.db_instance.public_ip
-	} 
-    # this doesn't work because you can't have more than 1 `command`
-    # provisioner "local-exec" {
-    #   command = <<EOT
-    #     cd app
-    #     export DB_HOST=${aws_instance.db_instance.public_ip}:27017/posts/
-    #     node seeds/seed.js
-    #     npm start
-    #   EOT
-
-      # command = "cd app"
-      # command = "export DB_HOST=${aws_instance.db_instance.public_ip}:27017/posts/"
-      # command = "node seeds/seed.js"
-      # command = "npm start"
-
-    #   connection {
-    #     type = "ssh"
-		#     user = "ubuntu"
-	  #   	private_key = var.aws_key_path
-	  #   	host = aws_instance.app_instance.public_ip
-    #   }
-    # }
-}
-
 # Adding a private subnet
 resource "aws_subnet" "sre_amy_terraform_private_subnet" {
     vpc_id = aws_vpc.sre_amy_terraform_vpc.id
@@ -124,22 +49,40 @@ resource "aws_subnet" "sre_amy_terraform_private_subnet" {
     }
 }
 
-# Adding a db security group
-resource "aws_security_group" "sre_amy_terraform_db_sg"  {
-    name = "sre_amy_terraform_db_sg"
-    description = "sre_amy_terraform_db_sg"
+# Making new security group for k8s
+resource "aws_security_group" "sre_k8s_app_sg"  {
+    name = "sre_k8s_app_sg"
+    description = "sre_k8s_app_sg"
     vpc_id = aws_vpc.sre_amy_terraform_vpc.id
+    ingress {
+        from_port = "80"
+        to_port = "80"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"] 
+    }
     ingress {
         from_port = "22"
         to_port = "22"
         protocol = "tcp"
-        cidr_blocks = ["${var.my_ip}/32"]
+        cidr_blocks = ["0.0.0.0/0"]
     }
     ingress {
-        from_port = "27017"
-        to_port = "27017"
+        from_port = "3000"
+        to_port = "3000"
         protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        cidr_blocks = ["0.0.0.0/0"]  
+    }
+    ingress {
+        from_port = "5000"
+        to_port = "5000"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  
+    }
+    ingress {
+        from_port = "30000"
+        to_port = "32757"
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  
     }
     egress {
         from_port = 0
@@ -147,39 +90,39 @@ resource "aws_security_group" "sre_amy_terraform_db_sg"  {
         protocol = "-1" # allow all
         cidr_blocks = ["0.0.0.0/0"]
     }
+
   tags = {
-    Name = "sre_amy_terraform_db_sg"
+    Name = "sre_k8s_app_sg"
   }
 }
 
-# Let's launch an EC2 instance using the db AMI
-resource "aws_instance" "db_instance" {
-    ami = var.db_ami_id
-    subnet_id = aws_subnet.sre_amy_terraform_private_subnet.id
+# Let's launch an EC2 instance
+resource "aws_instance" "sre_k8s_app" {
+    ami = var.k8_ami_id
+    subnet_id = aws_subnet.sre_amy_terraform_public_subnet.id
     instance_type = var.instance_type
     associate_public_ip_address = true
     tags = {
-       Name = "sre_amy_terraform_db"
+       Name = "sre_k8s_app"
     }
-    vpc_security_group_ids = [aws_security_group.sre_amy_terraform_db_sg.id]
+    vpc_security_group_ids = [aws_security_group.sre_k8s_app_sg.id]
     key_name = var.aws_key_name
     connection {
 		type = "ssh"
 		user = "ubuntu"
 		private_key = var.aws_key_path
-		host = db_instance.db_instance.public_ip
+		host = aws_instance.sre_k8s_app.id
 	} 
 }
-
 
 # CloudWatch Code Section
 # Launch configuration
 resource "aws_launch_configuration" "sre_amy_app_terraform_launch_config" {
   name = "sre_amy_app_terraform_launch_config"
-  image_id = var.webapp_ami_id
-  instance_type = "t2.micro"
+  image_id = var.k8_ami_id
+  instance_type = var.instance_type
   key_name = var.aws_key_name
-  security_groups = [aws_security_group.sre_amy_terraform_app_sg_2.id]
+  security_groups = [aws_security_group.sre_k8s_app_sg.id]
   associate_public_ip_address = true
 }
 
@@ -188,7 +131,7 @@ resource "aws_lb" "sre_amy_terraform_alb" {
   name = "sre-amy-terraform-alb"
   internal = false
   load_balancer_type = "application"
-  security_groups = [aws_security_group.sre_amy_terraform_app_sg_2.id]
+  security_groups = [aws_security_group.sre_k8s_app_sg.id]
   subnets = [aws_subnet.sre_amy_terraform_public_subnet.id, aws_subnet.sre_amy_terraform_private_subnet.id]
   tags = {
     Name = "sre-amy-terraform-alb"
@@ -221,7 +164,7 @@ resource "aws_lb_listener" "sre_amy_terraform_listener" {
 # target group attachment
 resource "aws_lb_target_group_attachment" "sre_amy_terraform_tg_attachment" {
   target_group_arn = aws_lb_target_group.sre_amy_terraform_target_group.arn
-  target_id = aws_instance.app_instance.id
+  target_id = aws_instance.sre_k8s_app.id
   port = 80
 }
 # auto scaling group from launch config
@@ -253,7 +196,7 @@ resource "aws_autoscaling_policy" "sre_amy_terraform_as_policy" {
         predefined_metric_specification {
             predefined_metric_type = "ASGAverageCPUUtilization"
         }
-        target_value = 2.0
+        target_value = 20
     }
 }
 
