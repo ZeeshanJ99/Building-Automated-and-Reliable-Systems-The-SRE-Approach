@@ -223,3 +223,235 @@ resource "aws_cloudwatch_metric_alarm" "sre_amy_CPU_scale_down_alarm" {
     alarm_description = "Monitors ASG EC2 average cpu utilization (for scale down policy)"
     alarm_actions = [aws_autoscaling_policy.sre_amy_CPU_scale_down_policy.arn]
 }
+
+resource "aws_cloudwatch_dashboard" "final_project_dashboard" {
+    dashboard_name = "sre_final_project_dashboard"
+
+    dashboard_body = jsonencode(
+        {
+        "widgets": [
+            {
+                "type":"metric",
+                "x":0,
+                "y":0,
+                "width":24,
+                "height":6,
+                "properties":{
+                    "metrics":[
+                    [
+                        "AWS/EC2",
+                        "CPUUtilization",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ]
+                    ],
+                    "period":10,
+                    "stat":"Average",
+                    "region":"eu-west-1",
+                    "title":"App's Average CPU",
+                    "liveData": true,
+                    "legend": {
+                        "position": "right"
+                    }
+                
+                }
+            },
+            {
+                "type":"metric",
+                "x":0,
+                "y":1,
+                "width":24,
+                "height":6,
+                "properties":{
+                    "metrics":[
+                    [
+                        "AWS/EC2",
+                        "NetworkIn",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ],
+                    [
+                        "AWS/EC2",
+                        "NetworkOut",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ]
+                    ],
+                    "period":10,
+                    "stat":"Average",
+                    "region":"eu-west-1",
+                    "title":"App's Average Network",
+                    "liveData": true,
+                    "legend": {
+                        "position": "right"
+                    }
+                
+                }
+            },
+            {
+                "type":"metric",
+                "x":0,
+                "y":2,
+                "width":24,
+                "height":6,
+                "properties":{
+                    "metrics":[
+                    [
+                        "AWS/AutoScaling",
+                        "GroupTotalInstances",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ],
+                    [
+                        "AWS/AutoScaling",
+                        "GroupPendingInstances",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ]
+                    ],
+                    "period":10,
+                    "stat":"Sum",
+                    "region":"eu-west-1",
+                    "title":"No. of Instances",
+                    "liveData": true,
+                    "legend": {
+                        "position": "right"
+                    }
+                
+                }
+            },
+            {
+                "type":"metric",
+                "x":0,
+                "y":3,
+                "width":24,
+                "height":6,
+                "properties":{
+                    "metrics":[
+                    [
+                        "AWS/ApplicationELB",
+                        "RequestCount",
+                        "LoadBalancer", "${aws_lb.sre_amy_terraform_alb.arn}" # load balancer ARN extension
+                    ]
+                    ],
+                    "period":10,
+                    "stat":"Sum",
+                    "region":"eu-west-1",
+                    "title":"Request Count",
+                    "liveData": true,
+                    "legend": {
+                        "position": "right"
+                    }
+                
+                }
+            },
+            {
+                "type":"metric",
+                "x":0,
+                "y":4,
+                "width":24,
+                "height":6,
+                "properties":{
+                    "metrics":[
+                    [
+                        "AWS/ApplicationELB",
+                        "RequestCountPerTarget",
+                        "TargetGroup", "${aws_lb_target_group.sre_amy_terraform_target_group.arn}" # target group ARN extension
+                    ]
+                    ],
+                    "period":10,
+                    "stat":"Sum",
+                    "region":"eu-west-1",
+                    "title":"Request Count Per Target",
+                    "liveData": true,
+                    "legend": {
+                        "position": "right"
+                    }
+                
+                }
+            },
+            {
+                "type":"metric",
+                "x":0,
+                "y":5,
+                "width":24,
+                "height":6,
+                "properties":{
+                    "metrics":[
+                    [
+                        "AWS/EC2",
+                        "DiskReadOps",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}",
+                    ],
+                    [
+                        "AWS/EC2",
+                        "DiskWriteOps",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ],
+                    ],
+                    "period":10,
+                    "stat":"Average",
+                    "region":"eu-west-1",
+                    "title":"Read/Write Ops",
+                    "liveData": true,
+                    "legend": {
+                        "position": "right"
+                    }
+                
+                }
+            },
+            {
+                "type":"metric",
+                "x":0,
+                "y":6,
+                "width":24,
+                "height":6,
+                "properties":{
+                    "metrics":[
+                    [
+                        "AWS/EC2",
+                        "DiskReadBytes",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ],
+                    [
+                        "AWS/EC2",
+                        "DiskWriteBytes",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                    ],
+                    ],
+                    "period":10,
+                    "stat":"Average",
+                    "region":"eu-west-1",
+                    "title":"Read/Write Bytes",
+                    "liveData": true,
+                    "legend": {
+                        "position": "right"
+                    }
+                
+                }
+            }
+        ]
+    }
+    )
+}
+
+###########################################################################
+###########################################################################
+# //SNS Setup\\
+resource "aws_sns_topic" "sre_ASG_alerts" {
+    name = "sre_ASG_alerts"
+}
+
+resource "aws_sns_topic_subscription" "sre_ASG_subscription" {
+    topic_arn = aws_sns_topic.sre_ASG_alerts.arn
+    protocol = "email"
+    endpoint = "amurphy@spartaglobal.com"
+}
+
+resource "aws_autoscaling_notification" "ASG_notifications" {
+    group_names = ["${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"]
+
+    notifications = [
+        "autoscaling:EC2_INSTANCE_LAUNCH",
+        "autoscaling:EC2_INSTANCE_TERMINATE",
+        "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+        "autoscaling:EC2_INSTANCE_TERMINATE_ERROR"
+    ]
+
+    topic_arn = aws_sns_topic.sre_ASG_alerts.arn
+}
