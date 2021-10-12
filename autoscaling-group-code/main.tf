@@ -49,6 +49,17 @@ resource "aws_subnet" "sre_amy_terraform_private_subnet" {
     }
 }
 
+# Adding a third subnet
+resource "aws_subnet" "sre_amy_terraform_third_subnet" {
+    vpc_id = aws_vpc.sre_amy_terraform_vpc.id
+    cidr_block = var.third_subnet_cidr
+    map_public_ip_on_launch = "true"
+    availability_zone = "eu-west-1c"
+    tags = {
+      Name = "sre_amy_terraform_private_subnet"
+    }
+}
+
 # Making new security group for k8s
 resource "aws_security_group" "sre_k8s_app_sg"  {
     name = "sre_k8s_app_sg"
@@ -132,7 +143,7 @@ resource "aws_lb" "sre_amy_terraform_alb" {
   internal = false
   load_balancer_type = "application"
   security_groups = [aws_security_group.sre_k8s_app_sg.id]
-  subnets = [aws_subnet.sre_amy_terraform_public_subnet.id, aws_subnet.sre_amy_terraform_private_subnet.id]
+  subnets = [aws_subnet.sre_amy_terraform_public_subnet.id, aws_subnet.sre_amy_terraform_private_subnet.id, aws_subnet.sre_amy_terraform_third_subnet.id]
   tags = {
     Name = "sre-amy-terraform-alb"
   }
@@ -178,6 +189,7 @@ resource "aws_autoscaling_group" "sre_amy_terraform_autoscaling_group" {
     vpc_zone_identifier = [
         aws_subnet.sre_amy_terraform_public_subnet.id,
         aws_subnet.sre_amy_terraform_private_subnet.id
+        aws_subnet.sre_amy_terraform_third_subnet.id
     ]
 
     enabled_metrics = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
