@@ -1,15 +1,27 @@
-# Building-Automated-and-Reliable-Systems-The-SRE-Approach
+# Building Automated and Reliable Systems: *The SRE Approach*
 
-edit this to fit what we will do
-![image](https://user-images.githubusercontent.com/88186084/136239372-db1e1718-071d-4e55-a3bc-0476ebc56c72.png)
+For our final week of training, we have been tasked to create a reliable system using all the tools and techniques we have learnt so far.
 
+The end goal is to create a fully automated system that will push changes to an app on the localhost onto the public, live app. Whilst that is happening the app will also be monitored and tested in order to ensure the reliablity and security of the system, alerting us of any changes to the traffic or CPU utilisation.
 
+### The Team:
+- [Akunma](https://github.com/andujiuba)
+- [Amy](https://github.com/am93596)
+- [Ioana](https://github.com/ioanan11)
+- [Kieron](https://github.com/sc18kg)
+- [Michael](https://github.com/om1chael)
+- [Sacha](https://github.com/sachadorf1)
+- [Viktor](https://github.com/ViMitre)
+- [Will](https://github.com/Mo0rBy)
+- [Zeeshan](https://github.com/ZeeshanJ99)
 
+## OVERVIEW
+### Here is a complete diagram, detailing the different parts of this project and how they all fit together
+
+![image](https://user-images.githubusercontent.com/88186581/136984377-dea26840-db63-43c7-aa8c-83933c9aaf8f.png)
 
 
 ![image](https://user-images.githubusercontent.com/88186084/136238993-0cfbb9d0-3009-4ba3-b9b9-7f8bc8a1c64a.png)
-
-
 
 
 ![image](https://user-images.githubusercontent.com/88186084/136239065-448783f5-304d-45ba-b61f-bc53178e4a5d.png)
