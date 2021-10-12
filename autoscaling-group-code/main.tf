@@ -188,7 +188,7 @@ resource "aws_autoscaling_group" "sre_amy_terraform_autoscaling_group" {
 
     vpc_zone_identifier = [
         aws_subnet.sre_amy_terraform_public_subnet.id,
-        aws_subnet.sre_amy_terraform_private_subnet.id
+        aws_subnet.sre_amy_terraform_private_subnet.id,
         aws_subnet.sre_amy_terraform_third_subnet.id
     ]
 
