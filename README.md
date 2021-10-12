@@ -5,15 +5,15 @@ For our final week of training, we have been tasked to create a reliable system 
 The end goal is to create a fully automated system that will push changes to an app on the localhost onto the public, live app. Whilst that is happening the app will also be monitored and tested in order to ensure the reliablity and security of the system, alerting us of any changes to the traffic or CPU utilisation.
 
 ### The Team:
-- [Akunma](https://github.com/andujiuba)
-- [Amy](https://github.com/am93596)
-- [Ioana](https://github.com/ioanan11)
-- [Kieron](https://github.com/sc18kg)
-- [Michael](https://github.com/om1chael)
-- [Sacha](https://github.com/sachadorf1)
-- [Viktor](https://github.com/ViMitre)
-- [Will](https://github.com/Mo0rBy)
-- [Zeeshan](https://github.com/ZeeshanJ99)
+- **[Akunma](https://github.com/andujiuba)**
+- **[Amy](https://github.com/am93596)**
+- **[Ioana](https://github.com/ioanan11)**
+- **[Kieron](https://github.com/sc18kg)**
+- **[Michael](https://github.com/om1chael)**
+- **[Sacha](https://github.com/sachadorf1)**
+- **[Viktor](https://github.com/ViMitre)**
+- **[Will](https://github.com/Mo0rBy)**
+- **[Zeeshan](https://github.com/ZeeshanJ99)**
 
 ## OVERVIEW
 ### Here is a complete diagram, detailing the different parts of this project and how they all fit together
@@ -48,6 +48,8 @@ The end goal is to create a fully automated system that will push changes to an 
 ------------------------
 
 ## Testing Team Section
+
+![image](https://user-images.githubusercontent.com/88186581/136989926-49c928dd-e172-4940-bdef-881004559ddc.png)
 
 -----------------------------------
 
