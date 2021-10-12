@@ -180,6 +180,8 @@ resource "aws_autoscaling_group" "sre_amy_terraform_autoscaling_group" {
         aws_subnet.sre_amy_terraform_private_subnet.id
     ]
 
+    enabled_metrics = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
+
     launch_configuration = aws_launch_configuration.sre_amy_app_terraform_launch_config.name
 }
 
@@ -296,12 +298,12 @@ resource "aws_cloudwatch_dashboard" "final_project_dashboard" {
                     [
                         "AWS/AutoScaling",
                         "GroupTotalInstances",
-                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                        "AutoScalingGroupName", "sre_amy_terraform_autoscaling_group"
                     ],
                     [
                         "AWS/AutoScaling",
                         "GroupPendingInstances",
-                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
+                        "AutoScalingGroupName", "sre_amy_terraform_autoscaling_group"
                     ]
                     ],
                     "period":10,
@@ -326,7 +328,7 @@ resource "aws_cloudwatch_dashboard" "final_project_dashboard" {
                     [
                         "AWS/ApplicationELB",
                         "RequestCount",
-                        "LoadBalancer", "${aws_lb.sre_amy_terraform_alb.arn}" # load balancer ARN extension
+                        "LoadBalancer", "app/sre-amy-terraform-alb/b4846e7b06747362" # load balancer ARN extension
                     ]
                     ],
                     "period":10,
@@ -351,7 +353,7 @@ resource "aws_cloudwatch_dashboard" "final_project_dashboard" {
                     [
                         "AWS/ApplicationELB",
                         "RequestCountPerTarget",
-                        "TargetGroup", "${aws_lb_target_group.sre_amy_terraform_target_group.arn}" # target group ARN extension
+                        "TargetGroup", "targetgroup/sre-amy-terraform-target-group/4022f670c6d52c1d" # target group ARN extension
                     ]
                     ],
                     "period":10,
@@ -376,7 +378,7 @@ resource "aws_cloudwatch_dashboard" "final_project_dashboard" {
                     [
                         "AWS/EC2",
                         "DiskReadOps",
-                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}",
+                        "AutoScalingGroupName", "${aws_autoscaling_group.sre_amy_terraform_autoscaling_group.name}"
                     ],
                     [
                         "AWS/EC2",
